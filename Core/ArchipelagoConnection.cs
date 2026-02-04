@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
@@ -6,21 +11,9 @@ using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.MessageLog.Parts;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
-using Mono.Cecil.Cil;
-using RepoAP.Core;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.UIElements;
-using MenuLib;
 using MenuLib.MonoBehaviors;
+using RepoAP.Core;
+using UnityEngine;
 
 namespace RepoAP
 {
@@ -133,22 +126,13 @@ namespace RepoAP
 
                 deathLinkService = session.CreateDeathLinkService();
 
-                /* deathLinkService.OnDeathLinkReceived += (deathLinkObject) =>
-                 {
-                     if (SceneManager.GetActiveScene().name != "TitleScreen" && _player != null && !_player.dead && !DeathLinkPatch.isDeathLink )
-                     {
-                         //Debug.Log("Death link received");
-                         DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
-                         DeathLinkPatch.isDeathLink = true;
-
-                     }
-                 };*/
+                deathLinkService.OnDeathLinkReceived += HandleIncomingDeathlink;
 
 
-                /*if ((bool)Plugin.connection.slotData["death_link"])
+                if (/*(bool)Plugin.connection.slotData["death_link"]*/Plugin.BoundConfig.Deathlink.Value)
                 {
                     deathLinkService.EnableDeathLink();
-                }*/
+                }
 
                 //SetupDataStorage();
 
@@ -530,21 +514,22 @@ namespace RepoAP
 
         public void SendDeathLink()
         {
-            if (connected)
+            if (connected && SemiFunc.IsMasterClientOrSingleplayer() && Plugin.BoundConfig.Deathlink.Value/* && (bool)Plugin.connection.slotData["death_link"]*/)
             {
-                deathLinkService.SendDeathLink(new DeathLink(session.Players.ActivePlayer.Name));
+                deathLinkService.SendDeathLink(new DeathLink(session.Players.ActivePlayer.Name, "got scrapped by the Taxman."));
             }
         }
 
-        /*public void HandleDeathLink()
+        public void HandleIncomingDeathlink(DeathLink deathLinkObject)
         {
-            if (!SemiFunc.MenuLevel() && !RunManager.AllPlayersDead && !DeathLinkPatch.isDeathLink)
+            if (SemiFunc.IsMasterClientOrSingleplayer() && !SemiFunc.MenuLevel() && !DeathLinkPatch.awaitingDeathLink)
             {
                 //Debug.Log("Death link received");
-                DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
-                DeathLinkPatch.isDeadFromDeathLink = true;
-
+                //DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
+                Plugin.Logger.LogInfo("Received death link");
+                DeathLinkPatch.playerWhoDied = deathLinkObject.Source;
+                DeathLinkPatch.awaitingDeathLink = true;
             }
-        }*/
+        }
     }
 }
