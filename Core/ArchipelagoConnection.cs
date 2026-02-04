@@ -128,8 +128,24 @@ namespace RepoAP
 
                 deathLinkService.OnDeathLinkReceived += HandleIncomingDeathlink;
 
+                     if (SceneManager.GetActiveScene().name != "TitleScreen" && _player != null && !_player.dead && !DeathLinkPatch.isDeathLink )
+                     {
+                         //Debug.Log("Death link received");
+                         DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
+                         DeathLinkPatch.isDeathLink = true;
 
-                if (/*(bool)Plugin.connection.slotData["death_link"]*/Plugin.BoundConfig.Deathlink.Value)
+                     }
+                 };*/
+                     if (SceneManager.GetActiveScene().name != "TitleScreen" && _player != null && !_player.dead && !DeathLinkPatch.isDeathLink )
+                if (DeathLinkEnabled())
+                         DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
+                         DeathLinkPatch.isDeathLink = true;
+
+                     }
+                 };*/
+
+
+                /*if ((bool)Plugin.connection.slotData["death_link"])
                 {
                     deathLinkService.EnableDeathLink();
                 }
@@ -498,7 +514,7 @@ namespace RepoAP
                 // monster soul goal
                 List<string> monsterData = await session.DataStorage[$"REPO-{session.Players.GetPlayerName(session.ConnectionInfo.Slot)}-monsterSoulsGathered"].GetAsync<List<string>>();
                 foreach (var item in monster_souls_gathered.Where(soul => !monsterData.Contains(soul)))
-                {
+            if (connected && SemiFunc.IsMasterClientOrSingleplayer() && DeathLinkEnabled())
                     monsterData.Add(item);
                 }
                 session.DataStorage[$"REPO-{session.Players.GetPlayerName(session.ConnectionInfo.Slot)}-monsterSoulsGathered"] = monsterData;
@@ -509,12 +525,18 @@ namespace RepoAP
                 // levelsUnlocked gets constructed from itemsReceived, so we don't need to store it on the server
                 // we already know locationsScouted gets filled if it isn't already
                 // the rest get filled when connecting as well
+                //DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
+                Plugin.Logger.LogInfo("Received death link");
+                DeathLinkPatch.playerWhoDied = deathLinkObject.Source;
+                DeathLinkPatch.awaitingDeathLink = true;
             }
         }
 
-        public void SendDeathLink()
+        internal bool DeathLinkEnabled()
         {
-            if (connected && SemiFunc.IsMasterClientOrSingleplayer() && Plugin.BoundConfig.Deathlink.Value/* && (bool)Plugin.connection.slotData["death_link"]*/)
+            return (Plugin.BoundConfig.OverrideMWDeathlink.Value && Plugin.BoundConfig.Deathlink.Value) || (!Plugin.BoundConfig.OverrideMWDeathlink.Value && (bool)Plugin.connection.slotData["death_link"]);
+        }
+            if (connected)
             {
                 deathLinkService.SendDeathLink(new DeathLink(session.Players.ActivePlayer.Name, "got scrapped by the Taxman."));
             }
@@ -525,11 +547,10 @@ namespace RepoAP
             if (SemiFunc.IsMasterClientOrSingleplayer() && !SemiFunc.MenuLevel() && !DeathLinkPatch.awaitingDeathLink)
             {
                 //Debug.Log("Death link received");
-                //DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
-                Plugin.Logger.LogInfo("Received death link");
-                DeathLinkPatch.playerWhoDied = deathLinkObject.Source;
-                DeathLinkPatch.awaitingDeathLink = true;
+                DeathLinkPatch.deathMsg = deathLinkObject.Cause == null ? $"{deathLinkObject.Source} died. Point and laugh." : $"{deathLinkObject.Cause}";
+                DeathLinkPatch.isDeadFromDeathLink = true;
+
             }
-        }
+        }*/
     }
 }
