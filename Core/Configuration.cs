@@ -12,8 +12,8 @@ namespace RepoAP
         public ConfigEntry<bool> DisplayAPMessagesOnTruckScreen;
         public ConfigEntry<int> EnemyWeightIncrease;
         public ConfigEntry<int> ValuableSubstitutionChance;
-        public ConfigEntry<bool> OverrideMWDeathlink;
         public ConfigEntry<bool> Deathlink;
+        //public ConfigEntry<bool> DeathLink;   // for the future
         public PluginConfig(ConfigFile cfg)
         {
             DisplayAPMessagesOnTruckScreen = cfg.Bind("General", "Display Archipelago messages on truck screen", true, "If true, the truck screen will display messages from the multiworld chat. " +
@@ -26,8 +26,6 @@ namespace RepoAP
                 "50 means roughly half of all valuables will be replaced, 100 means all valuables will be replaced when possible. Minimum value is 0, maximum is 100.");
             Deathlink = cfg.Bind("General", "Enable death link", false,
                 "When you die, everyone who enabled death link dies. Of course, the reverse is true too.");
-            OverrideMWDeathlink = cfg.Bind("General", "Override yaml death link option", false,
-                "If true, the mod config will be used to turn death link on/off instead of the yaml option.");
 
             ClearUnusedEntries(cfg);
         }
