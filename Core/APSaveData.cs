@@ -521,10 +521,21 @@ namespace RepoAP
                 }
             }
 
-
-
-
-            status += $"<br>{{?}} Pelly - {collectedCount}/{totalCount}{(collectedCount == totalCount ? " {check}" : " {X}")}";
+            if (RunManager.instance.levels.Contains(RunManager.instance.levelCurrent))
+            {
+                status += $"<br>{{?}} {RunManager.instance.levelCurrent.NarrativeName} Pellys:<br><indent=10%>";
+                foreach (var pelly in saveData.pellysRequired)
+                {
+                    status += saveData.pellysGathered.Any(x => x.Contains(pelly.ToString()) && x.Contains(RunManager.instance.levelCurrent.name)) ?
+                        $"{pelly.ToString().Replace(" Pelly", "")} {{check}} | " :
+                        $"{pelly.ToString().Replace(" Pelly", "")} {{X}} | ";
+                }
+                status += "</indent>";
+            }
+            else
+            {
+                status += $"<br>{{?}} Pellys - {collectedCount}/{totalCount}{(collectedCount == totalCount ? " {check}" : " {X}")}";
+            }
 
             //Check if Monster Hunt is complete
             if (saveData.monsterHunt)
@@ -574,7 +585,7 @@ namespace RepoAP
 
             if(goalMet) Plugin.Logger.LogInfo("All Goals Complete.");
 
-            _ = Plugin.connection.SyncCompletionProgress(completedLevels, APSave.saveData.pellysGathered, APSave.saveData.valuablesGathered, APSave.saveData.monsterSoulsGathered, APSave.saveData.shopStockReceived);
+            _ = Plugin.connection.SyncCompletionProgress(completedLevels, APSave.saveData.pellysGathered, APSave.saveData.valuablesGathered, APSave.saveData.monsterSoulsGathered);
 
             return goalMet;
         }
